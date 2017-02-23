@@ -4,6 +4,20 @@ private static int NUM_ROWS = 20;
 private static int NUM_COLS = 20;
 private static int NUM_BOMS = 30;
 
+private PImage bombImg;
+/*
+PImage img;
+
+void setup() {
+  // Images must be in the "data" directory to load correctly
+  img = loadImage("laDefense.jpg");
+}
+
+void draw() {
+  image(img, 0, 0);
+}
+*/
+
 private MSButton[][] buttons; 
 private ArrayList <MSButton> bombs = new ArrayList <MSButton>();
 //private ArrayList <MSButton> nonBombs = new ArrayList <MSButton>();
@@ -12,6 +26,10 @@ void setup ()
 {
     size(800, 800);
     textAlign(CENTER,CENTER);
+
+    //ellipseMode(CENTER);
+
+    bombImg = loadImage("bombImg.jpeg");
     
     // make the manager
     Interactive.make( this );
@@ -149,8 +167,13 @@ public class MSButton
     {    
         if (marked)
             fill(0);
-        else if( clicked && bombs.contains(this) ) 
-             fill(255,0,0);
+        else if( clicked && bombs.contains(this)) 
+        {
+            fill(255,0,0);
+            //ellipse(x+width/2, y+width/2, width - 7, height - 7);            
+            //fill(200);
+            //image(bombImg,x+width/2, y+ height/2);
+        }
         else if(clicked)
             fill( 200 );
         else if(win)
