@@ -116,7 +116,7 @@ public class MSButton
         else if(bombs.contains(this))
             displayLosingMessage();
         else if(countBombs(r,c)!=0)
-            label=Integer.toString(countBombs(r,c));
+            label=""+countBombs(r,c);
         else
         {
             if(isValid(r,c-1) && buttons[r][c-1].isClicked()==false)
