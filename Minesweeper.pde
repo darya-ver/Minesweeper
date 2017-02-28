@@ -11,7 +11,7 @@ private PImage bombImg;
 private PImage flagImg;
 
 String urlBomb = "https://d30y9cdsu7xlg0.cloudfront.net/png/54644-200.png";
-String urlFlag = "http://www.morris.umn.edu/images/icons/256/flag.png";
+String urlFlag = "http://clipart-finder.com/data/mini/1312140781.png";
 
 private MSButton[][] buttons; 
 private ArrayList <MSButton> bombs = new ArrayList <MSButton>();
