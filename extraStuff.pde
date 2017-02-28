@@ -1,4 +1,3 @@
-
 public class Button
 {
     private int myX, myY, myColor, widthh, heightt;
@@ -21,6 +20,10 @@ public class Button
         fill(255,0,0);
         textSize(30);
 
+        if(myType == "restart")
+            text("Restart", myX+widthh/2, myY);
+
+        /*
         if(myType == "boxSizePlus")
         {
             text("+", myX+widthh/2, myY + heightt/2-5);
@@ -37,6 +40,7 @@ public class Button
         {
             text("-", myX+widthh/2, myY + heightt/2-5);
         }
+        */
     }
   
     public void highlighted()
