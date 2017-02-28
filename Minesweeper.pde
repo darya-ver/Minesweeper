@@ -1,30 +1,34 @@
 import de.bezier.guido.*;
 
-private int NUM_ROWS = 20;
-private int NUM_COLS = 20;
-private int NUM_BOMS = 20;
-private int NUM_NON_BOMS = NUM_ROWS*NUM_COLS - NUM_BOMS;
+private static final int NUM_ROWS = 20;
+private static final int NUM_COLS = 20;
+private static final int NUM_BOMS = 50;
+//private int NUM_NON_BOMS = NUM_ROWS*NUM_COLS - NUM_BOMS;
 
-//private Button moreBoxes = new Button(900,100,"boxSizePlus");
 private ArrayList <Button> changeSizeButtons = new ArrayList <Button>();
 
-//private PImage bombImg;
-private PImage webImg;
+private PImage bombImg;
+private PImage flagImg;
 
-String url = "https://d30y9cdsu7xlg0.cloudfront.net/png/54644-200.png";
-  // Load image from a web server
-  //webImg = loadImage(url, "png");
+String urlBomb = "https://d30y9cdsu7xlg0.cloudfront.net/png/54644-200.png";
+String urlFlag = "http://www.morris.umn.edu/images/icons/256/flag.png";
 
 private MSButton[][] buttons; 
 private ArrayList <MSButton> bombs = new ArrayList <MSButton>();
+private ArrayList <Confetti> confetti = new ArrayList <Confetti>();
+
+private boolean lost = false;
 
 void setup ()
 {
-    size(1000, 800);
+    size(1000, 700);
     textAlign(CENTER,CENTER);
 
-    //bombImg = loadImage("bomb2.png");
-    webImg = loadImage(url, "png");
+    for(int i = 0; i<100; i++)
+    confetti.add(new Confetti());
+
+    bombImg = loadImage(urlBomb, "png");
+    flagImg = loadImage(urlFlag, "png");
     
     // make the manager
     Interactive.make( this );
@@ -35,11 +39,6 @@ void setup ()
         for(int r = 0; r<NUM_ROWS; r++)
             buttons[r][c] = new MSButton(r,c);
 
-    //changeSizeButtons.add(new Button(900, 100, "boxSizePlus"));
-    //changeSizeButtons.add(new Button(950, 100, "boxSizeMinus"));
-    changeSizeButtons.add(new Button(900, 200, "numBoxesPlus"));
-    changeSizeButtons.add(new Button(950, 200, "numBoxesMinus"));
-    
     setBombs();
     imageMode(CENTER);
 }
@@ -66,45 +65,50 @@ public void draw ()
     if(isWon())
         displayWinningMessage();
 
+    if(lost)
+        displayLosingMessage();
     //gameRunning();
 }
 
 public void gameRunning()
 {
-    for(int i = 0; i<changeSizeButtons.size(); i++)
-    {
-        changeSizeButtons.get(i).show();
-        if(changeSizeButtons.get(i).inButton()==true) changeSizeButtons.get(i).highlighted();
-        else  changeSizeButtons.get(i).nonHighlighted();
-    }  
+    //in future: make button for different size playing field
 }
 
 public boolean isWon()
 {
-    int numberOfClickedThings = 0;
+    for(int r = 0; r < NUM_ROWS; r++)
+        for(int c = 0; c < NUM_COLS; c++)
+            if(!bombs.contains(buttons[r][c]) && !buttons[r][c].isClicked())
+                return false;
 
-    for(int c = 0; c<NUM_COLS; c++)
-        for(int r = 0; r<NUM_ROWS; r++)
-            if(!bombs.contains(buttons[r][c]) && buttons[r][c].isClicked()==true)
-                numberOfClickedThings ++;
-
-    if(numberOfClickedThings == NUM_NON_BOMS)  return true;
-    return false;
+    return true; 
 }
 
 public void displayLosingMessage()
 {
-    buttons[NUM_ROWS/2][NUM_COLS/2].setLabel("L");
-    buttons[NUM_ROWS/2][NUM_COLS/2].setLose();
-    
     for(MSButton bombb : bombs)
+    {
+        bombb.setMarked(false);
         bombb.setClicked(true);
+    }
+    fill(110);
+    text("AWE you lost :(", height+(width-height)/2, 50);
 }
 
 public void displayWinningMessage()
 {
-    buttons[NUM_ROWS/2][NUM_COLS/2].setLabel("W");
-    buttons[NUM_ROWS/2][NUM_COLS/2].setWin();
+    /*
+    for(Confetti con : confetti)
+    {
+        con.move();
+        con.show();
+    }
+    */
+
+    fill(110);
+    text("OMG you won!", height+(width-height)/2, 50);
+
 }
 
 
@@ -112,19 +116,19 @@ public class MSButton
 {
     private int r, c;
     private float x,y, width, height;
-    private boolean clicked, marked, win, lose;
+    private boolean clicked, marked;
     private String label;
     
     public MSButton ( int rr, int cc )
     {
-        width = 800/NUM_COLS;
-        height = 800/NUM_ROWS;
+        width = 700/NUM_COLS;
+        height = 700/NUM_ROWS;
         r = rr;
         c = cc; 
         x = c*width;
         y = r*height;
         label = "";
-        marked = clicked = win = lose = false;
+        marked = clicked = false;
         Interactive.add( this ); // register it with the manager
     }
 
@@ -134,10 +138,8 @@ public class MSButton
 
     public void setClicked(boolean sett){clicked = sett;}
 
-    public void setWin(){win = !win;}
+    public void setMarked(boolean sett){marked = sett;}
 
-    public void setLose(){lose = !lose;}
-    
     public void mousePressed () 
     {
         clicked = true;
@@ -145,13 +147,17 @@ public class MSButton
         if(mouseButton == RIGHT)
         {
             marked = !marked;
+            
             if(marked==false)
-              clicked = false;
+                clicked = false;
         }
+
         else if(bombs.contains(this))
-            displayLosingMessage();
+            lost=true;
+
         else if(countBombs(r,c)!=0)
             label=""+countBombs(r,c);
+
         else
         {
             if(isValid(r,c-1) && buttons[r][c-1].isClicked()==false)
@@ -183,38 +189,64 @@ public class MSButton
     public void draw () 
     {    
         textSize(30);
+        stroke(100);
+        strokeWeight(2);
+
         if (marked)
-            fill(0);
-        else if( clicked && bombs.contains(this)) 
         {
-            fill(255,0,0);
-            rect(x, y, width, height);          
-            fill(200);
-            image(webImg, x + width/2+3, y+ height/2, width, height);
+            fill(150);
+            rect(x, y, width, height);
+
+            //making the box look 3D
+            noStroke();
+            
+            fill(255);
+            quad(x, y, x+5, y, x+5, y+height-5, x, y+height);
+            quad(x, y, x+width, y, x+width-5, y+5, x, y+5);
+            
+            fill(100);
+            quad(x+5, y+height-5, x+width, y+height-5, x+width, y+height, x, y+height);
+            quad(x+width-5, y+5, x+width, y, x+width, y+height, x+width-5, y+height);
+            
+            image(flagImg, x + width/2+3, y+ height/2, width-15, height-15);
         }
+
+        else if(clicked && bombs.contains(this)) 
+        {
+            fill(150);
+            rect(x, y, width, height);          
+            //fill(200);
+            image(bombImg, x + width/2+3, y+ height/2, width, height);
+        }
+
         else if(clicked)
         {
-            fill( 200 ); 
-            rect(x, y, width, height);
-        }
-        else if(win)
-        {
-            fill(0,255,0);
-            rect(x, y, width, height);
-        }
-        else if(lose)
-        {
-            fill(0,0,255);
-            rect(x, y, width, height);
-        }
-        else 
-        {
-            fill(100);
+            fill(150); 
             rect(x, y, width, height);
         }
 
-        fill(0);
-        text(label,x+width/2,y+height/2);
+        else 
+        {
+            fill(150);
+            rect(x, y, width, height);
+
+            //making the box look 3D
+            noStroke();
+            
+            fill(255);
+            quad(x, y, x+5, y, x+5, y+height-5, x, y+height);
+            quad(x, y, x+width, y, x+width-5, y+5, x, y+5);
+            
+            fill(100);
+            quad(x+5, y+height-5, x+width, y+height-5, x+width, y+height, x, y+height);
+            quad(x+width-5, y+5, x+width, y, x+width, y+height, x+width-5, y+height);
+        }
+
+        if(countBombs(r,c) == 1)    fill(0,0,255);
+        else if(countBombs(r,c) == 2)   fill(0,102,0);
+        else if(countBombs(r,c) == 3)   fill(255,0,0);
+
+        text(label,x+width/2,y+height/2-3);
     }
 
     public void setLabel(String newLabel){label = newLabel;}
@@ -238,93 +270,157 @@ public class MSButton
         return numBombs;
     }
 }
+/*
+ArrayList<Confetti> confetti = new ArrayList<Confetti>();
+
+void setup()
+{
+  size(1000,700);
+  for(int i = 0; i<100; i++)
+    confetti.add(new Confetti());
+}
+void draw()
+{
+  background(0);
+  for(Confetti con : confetti)
+  {
+    con.move();
+    con.show();
+  }
+}
+*/
+
+public class Confetti
+{
+    int myX, myY, myColor, mySpeed, originalX, originalY;
+    float myAngle;
+
+    Confetti()
+    {
+        myX = height + (int)(Math.random()*(width-height));
+        myY = -(int)(Math.random()*height);
+        originalX = myX;
+        originalY = myY;
+        mySpeed = (int)(Math.random()*5)+6;
+        double randomm = Math.random();
+        if(randomm < 0.33)
+            myColor = color(255,0,0);
+        else if(randomm < 0.66)
+            myColor = color(0,102,0);
+        else
+            myColor = color(0,0,255);
+
+        myAngle = (float)(Math.random()*2*PI/3+PI/6);
+    }
+
+    void show()
+    {
+        stroke(0);
+        fill(myColor);
+        rect(myX, myY, 10, 20,10);
+    }
+
+    void move()
+    {
+        myX += (int)(cos(myAngle)*mySpeed);
+        myY += (int)(sin(myAngle)*mySpeed);
+        if(myY > height || myX < height || myX > width)
+        {
+          myY = originalY;
+          myX = originalX;
+          mySpeed = (int)(Math.random()*5)+6;
+        }
+    }
+}
 
 public class Button
 {
-  private int myX, myY, myColor, widthh, heightt;
-  private String myType;
+    private int myX, myY, myColor, widthh, heightt;
+    private String myType;
 
-  Button(int x, int y, String type)
-  {
-    myX = x;
-    myY = y;
-    myType = type;
-    myColor = 255;
-    widthh = 40;
-    heightt = 40;
-  }
+    Button(int x, int y, String type)
+    {
+        myX = x;
+        myY = y;
+        myType = type;
+        myColor = 255;
+        widthh = 40;
+        heightt = 40;
+    }
 
-  public void show()
-  {
-    //noStroke();
-    fill(myColor);
-    rect(myX, myY, widthh,heightt, 10);
-    fill(255,0,0);
-    textSize(30);
+    public void show()
+    {
+        fill(myColor);
+        rect(myX, myY, widthh, heightt, 10);
+        fill(255,0,0);
+        textSize(30);
 
-    if(myType == "boxSizePlus")
-    {
-        text("+", myX+widthh/2, myY + heightt/2-5);
+        if(myType == "boxSizePlus")
+        {
+            text("+", myX+widthh/2, myY + heightt/2-5);
+        }
+        else if(myType == "boxSizeMinus")
+        {
+            text("-", myX+widthh/2, myY + heightt/2-5);
+        }
+        else if(myType == "numBoxesPlus")
+        {
+            text("+", myX+widthh/2, myY + heightt/2-5);
+        }
+        else if(myType == "numBoxesMinus")
+        {
+            text("-", myX+widthh/2, myY + heightt/2-5);
+        }
     }
-    else if(myType == "boxSizeMinus")
-    {
-        text("-", myX+widthh/2, myY + heightt/2-5);
-    }
-    else if(myType == "numBoxesPlus")
-    {
-        text("+", myX+widthh/2, myY + heightt/2-5);
-    }
-    else if(myType == "numBoxesMinus")
-    {
-        text("-", myX+widthh/2, myY + heightt/2-5);
-    }
-  }
   
-  public void highlighted()
-  {
-    myColor = color(250,237,150);      
-  }   
-  public void nonHighlighted()
-  {
-    myColor = 255;
-  }
+    public void highlighted()
+    {
+        myColor = color(250,237,150);      
+    }
 
-  public boolean inButton()
-  {
-    if(mouseX > myX && mouseX < myX+widthh && mouseY > myY && mouseY < myY+heightt)
-        return true;
-    return false;
-  }
+    public void nonHighlighted()
+    {
+        myColor = 255;
+    }
+
+    public boolean inButton()
+    {
+        if(mouseX > myX && mouseX < myX+widthh && mouseY > myY && mouseY < myY+heightt)
+            return true;
+        return false;
+    }
 }
 
+/*
 public class GameRestart
 {
-  int myColor;
+    int myColor;
 
-  GameRestart()
-  {
-    myColor = color(224, 74, 69);
-  }
+    GameRestart()
+    {
+        myColor = color(224, 74, 69);
+    }
 
-  void show()
-  {
-    fill(myColor);
-    rect(200, 400, 200, 70,10);
-    fill(255);
-    textSize(30);
-    text("Restart", 245,445);
-  }
+    void show()
+    {
+        fill(myColor);
+        rect(200, 400, 200, 70,10);
+        fill(255);
+        textSize(30);
+        text("Restart", 245,445);
+    }
 
-  void nonHighlighted()
-  {
-    myColor = color(224, 74, 69);
-  }
+    void nonHighlighted()
+    {
+        myColor = color(224, 74, 69);
+    }
 
-  void highlighted()
-  {
-    myColor = color(242, 40, 33);
-  }
+    void highlighted()
+    {
+        myColor = color(242, 40, 33);
+    }
 }
+*/
 
 
 
