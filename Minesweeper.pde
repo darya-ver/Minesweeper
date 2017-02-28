@@ -8,7 +8,12 @@ private int NUM_NON_BOMS = NUM_ROWS*NUM_COLS - NUM_BOMS;
 //private Button moreBoxes = new Button(900,100,"boxSizePlus");
 private ArrayList <Button> changeSizeButtons = new ArrayList <Button>();
 
-private PImage bombImg;
+//private PImage bombImg;
+private PImage webImg;
+
+String url = "https://d30y9cdsu7xlg0.cloudfront.net/png/54644-200.png";
+  // Load image from a web server
+  //webImg = loadImage(url, "png");
 
 private MSButton[][] buttons; 
 private ArrayList <MSButton> bombs = new ArrayList <MSButton>();
@@ -18,7 +23,8 @@ void setup ()
     size(1000, 800);
     textAlign(CENTER,CENTER);
 
-    bombImg = loadImage("bomb2.png");
+    //bombImg = loadImage("bomb2.png");
+    webImg = loadImage(url, "png");
     
     // make the manager
     Interactive.make( this );
@@ -60,7 +66,7 @@ public void draw ()
     if(isWon())
         displayWinningMessage();
 
-    gameRunning();
+    //gameRunning();
 }
 
 public void gameRunning()
@@ -176,6 +182,7 @@ public class MSButton
 
     public void draw () 
     {    
+        textSize(30);
         if (marked)
             fill(0);
         else if( clicked && bombs.contains(this)) 
@@ -183,7 +190,7 @@ public class MSButton
             fill(255,0,0);
             rect(x, y, width, height);          
             fill(200);
-            image(bombImg, x + width/2+3, y+ height/2, width, height);
+            image(webImg, x + width/2+3, y+ height/2, width, height);
         }
         else if(clicked)
         {
@@ -243,8 +250,8 @@ public class Button
     myY = y;
     myType = type;
     myColor = 255;
-    widthh=40;
-    heightt=40;
+    widthh = 40;
+    heightt = 40;
   }
 
   public void show()
