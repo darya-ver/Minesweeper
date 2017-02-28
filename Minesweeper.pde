@@ -1,35 +1,24 @@
 import de.bezier.guido.*;
 
-private static int NUM_ROWS = 20;
-private static int NUM_COLS = 20;
-private static int NUM_BOMS = 30;
+private int NUM_ROWS = 20;
+private int NUM_COLS = 20;
+private int NUM_BOMS = 20;
+private int NUM_NON_BOMS = NUM_ROWS*NUM_COLS - NUM_BOMS;
+
+//private Button moreBoxes = new Button(900,100,"boxSizePlus");
+private ArrayList <Button> changeSizeButtons = new ArrayList <Button>();
 
 private PImage bombImg;
-/*
-PImage img;
-
-void setup() {
-  // Images must be in the "data" directory to load correctly
-  img = loadImage("laDefense.jpg");
-}
-
-void draw() {
-  image(img, 0, 0);
-}
-*/
 
 private MSButton[][] buttons; 
 private ArrayList <MSButton> bombs = new ArrayList <MSButton>();
-//private ArrayList <MSButton> nonBombs = new ArrayList <MSButton>();
 
 void setup ()
 {
-    size(800, 800);
+    size(1000, 800);
     textAlign(CENTER,CENTER);
 
-    //ellipseMode(CENTER);
-
-    bombImg = loadImage("bombImg.jpeg");
+    bombImg = loadImage("bomb2.png");
     
     // make the manager
     Interactive.make( this );
@@ -39,8 +28,14 @@ void setup ()
     for(int c = 0; c<NUM_COLS; c++)
         for(int r = 0; r<NUM_ROWS; r++)
             buttons[r][c] = new MSButton(r,c);
+
+    //changeSizeButtons.add(new Button(900, 100, "boxSizePlus"));
+    //changeSizeButtons.add(new Button(950, 100, "boxSizeMinus"));
+    changeSizeButtons.add(new Button(900, 200, "numBoxesPlus"));
+    changeSizeButtons.add(new Button(950, 200, "numBoxesMinus"));
     
     setBombs();
+    imageMode(CENTER);
 }
 
 public void setBombs()
@@ -51,7 +46,10 @@ public void setBombs()
         int roww = (int)(Math.random()*NUM_ROWS);
         
         if(!bombs.contains(buttons[roww][coll]))
+        {
             bombs.add(buttons[roww][coll]);
+            //System.out.println("("+roww+","+coll+")");
+        }
     }
 }
 
@@ -61,6 +59,18 @@ public void draw ()
 
     if(isWon())
         displayWinningMessage();
+
+    gameRunning();
+}
+
+public void gameRunning()
+{
+    for(int i = 0; i<changeSizeButtons.size(); i++)
+    {
+        changeSizeButtons.get(i).show();
+        if(changeSizeButtons.get(i).inButton()==true) changeSizeButtons.get(i).highlighted();
+        else  changeSizeButtons.get(i).nonHighlighted();
+    }  
 }
 
 public boolean isWon()
@@ -69,10 +79,10 @@ public boolean isWon()
 
     for(int c = 0; c<NUM_COLS; c++)
         for(int r = 0; r<NUM_ROWS; r++)
-            if(buttons[r][c].isClicked()==true)
+            if(!bombs.contains(buttons[r][c]) && buttons[r][c].isClicked()==true)
                 numberOfClickedThings ++;
 
-    if(numberOfClickedThings == NUM_ROWS*NUM_COLS)  return true;
+    if(numberOfClickedThings == NUM_NON_BOMS)  return true;
     return false;
 }
 
@@ -90,6 +100,7 @@ public void displayWinningMessage()
     buttons[NUM_ROWS/2][NUM_COLS/2].setLabel("W");
     buttons[NUM_ROWS/2][NUM_COLS/2].setWin();
 }
+
 
 public class MSButton
 {
@@ -125,7 +136,7 @@ public class MSButton
     {
         clicked = true;
 
-        if(keyPressed && key=='c')
+        if(mouseButton == RIGHT)
         {
             marked = !marked;
             if(marked==false)
@@ -170,20 +181,31 @@ public class MSButton
         else if( clicked && bombs.contains(this)) 
         {
             fill(255,0,0);
-            //ellipse(x+width/2, y+width/2, width - 7, height - 7);            
-            //fill(200);
-            //image(bombImg,x+width/2, y+ height/2);
+            rect(x, y, width, height);          
+            fill(200);
+            image(bombImg, x + width/2+3, y+ height/2, width, height);
         }
         else if(clicked)
-            fill( 200 );
+        {
+            fill( 200 ); 
+            rect(x, y, width, height);
+        }
         else if(win)
+        {
             fill(0,255,0);
+            rect(x, y, width, height);
+        }
         else if(lose)
+        {
             fill(0,0,255);
+            rect(x, y, width, height);
+        }
         else 
+        {
             fill(100);
+            rect(x, y, width, height);
+        }
 
-        rect(x, y, width, height);
         fill(0);
         text(label,x+width/2,y+height/2);
     }
@@ -210,6 +232,92 @@ public class MSButton
     }
 }
 
+public class Button
+{
+  private int myX, myY, myColor, widthh, heightt;
+  private String myType;
+
+  Button(int x, int y, String type)
+  {
+    myX = x;
+    myY = y;
+    myType = type;
+    myColor = 255;
+    widthh=40;
+    heightt=40;
+  }
+
+  public void show()
+  {
+    //noStroke();
+    fill(myColor);
+    rect(myX, myY, widthh,heightt, 10);
+    fill(255,0,0);
+    textSize(30);
+
+    if(myType == "boxSizePlus")
+    {
+        text("+", myX+widthh/2, myY + heightt/2-5);
+    }
+    else if(myType == "boxSizeMinus")
+    {
+        text("-", myX+widthh/2, myY + heightt/2-5);
+    }
+    else if(myType == "numBoxesPlus")
+    {
+        text("+", myX+widthh/2, myY + heightt/2-5);
+    }
+    else if(myType == "numBoxesMinus")
+    {
+        text("-", myX+widthh/2, myY + heightt/2-5);
+    }
+  }
+  
+  public void highlighted()
+  {
+    myColor = color(250,237,150);      
+  }   
+  public void nonHighlighted()
+  {
+    myColor = 255;
+  }
+
+  public boolean inButton()
+  {
+    if(mouseX > myX && mouseX < myX+widthh && mouseY > myY && mouseY < myY+heightt)
+        return true;
+    return false;
+  }
+}
+
+public class GameRestart
+{
+  int myColor;
+
+  GameRestart()
+  {
+    myColor = color(224, 74, 69);
+  }
+
+  void show()
+  {
+    fill(myColor);
+    rect(200, 400, 200, 70,10);
+    fill(255);
+    textSize(30);
+    text("Restart", 245,445);
+  }
+
+  void nonHighlighted()
+  {
+    myColor = color(224, 74, 69);
+  }
+
+  void highlighted()
+  {
+    myColor = color(242, 40, 33);
+  }
+}
 
 
 
