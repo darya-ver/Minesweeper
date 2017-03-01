@@ -2,7 +2,7 @@ import de.bezier.guido.*;
 
 private static final int NUM_ROWS = 20;
 private static final int NUM_COLS = 20;
-private static final int NUM_BOMS = 20;
+private static final int NUM_BOMS = 10;
 
 private ArrayList <Button> changeSizeButtons = new ArrayList <Button>();
 
@@ -15,6 +15,7 @@ String urlFlag = "http://clipart-finder.com/data/mini/1312140781.png";
 private MSButton[][] buttons;
 
 private ArrayList <MSButton> bombs = new ArrayList <MSButton>();
+private ArrayList <MSButton> lastBombClicked = new ArrayList <MSButton>();
 
 private boolean lost = false;
 
@@ -28,12 +29,14 @@ void setup ()
     bombImg = loadImage(urlBomb, "png");
     flagImg = loadImage(urlFlag, "png");
 
-    restart = new GameButton(height + 20, 100, "restart");
+    restart = new GameButton(height + (width - height)/2 - 60, 100, "restart");
     
     // make the manager
     Interactive.make( this );
     
     buttons = new MSButton[NUM_ROWS][NUM_COLS];
+
+    lastBombClicked.add(new MSButton(0,0));
 
     for(int c = 0; c<NUM_COLS; c++)
         for(int r = 0; r<NUM_ROWS; r++)
@@ -55,6 +58,8 @@ public void setBombs()
             bombs.add(buttons[roww][coll]);
             //System.out.println("("+roww+","+coll+")");
         }
+        else
+            i--;
     }
 }
 
@@ -67,6 +72,12 @@ public void removeBombs()
 public void draw ()
 {
     background(0);
+
+    for(MSButton butt : bombs)
+    {
+        if(lastBombClicked.contains(butt))  butt.lastOneClicked = true;
+        else if(!lastBombClicked.contains(butt)) butt.lastOneClicked = false;
+    }
 
     if(isWon())
         displayWinningMessage();
@@ -106,6 +117,7 @@ public void displayWinningMessage()
     fill(110);
     text("OMG you won!", height+(width-height)/2, 50);
 
+    restart.show();
 }
 
 public class MSButton
@@ -140,7 +152,8 @@ public class MSButton
     {
         clicked = true;
 
-        if(bombs.contains(this)) lastOneClicked = true;
+        if(bombs.contains(this))
+            lastBombClicked.set(0,this);
 
         if(mouseButton == RIGHT)
         {
@@ -199,14 +212,14 @@ public class MSButton
             noStroke();
             
             fill(255);
-            quad(x, y, x+3, y, x+3, y+height-3, x, y+height);
-            quad(x, y, x+width, y, x+width-3, y+3, x, y+3);
+            quad(x, y, x+4, y, x+4, y+height-4, x, y+height);
+            quad(x, y, x+width, y, x+width-4, y+4, x, y+4);
             
             fill(100);
-            quad(x+3, y+height-3, x+width, y+height-3, x+width, y+height, x, y+height);
-            quad(x+width-3, y+3, x+width, y, x+width, y+height, x+width-3, y+height);
+            quad(x+4, y+height-4, x+width, y+height-4, x+width, y+height, x, y+height);
+            quad(x+width-4, y+4, x+width, y, x+width, y+height, x+width-4, y+height);
             
-            image(flagImg, x + width/2+3, y+ height/2, width-15, height-15);
+            image(flagImg, x + width/2+4, y+ height/2, width-15, height-15);
         }
 
         else if(clicked && bombs.contains(this) && lastOneClicked) 
@@ -238,12 +251,12 @@ public class MSButton
             noStroke();
             
             fill(255);
-            quad(x, y, x+3, y, x+3, y+height-3, x, y+height);
-            quad(x, y, x+width, y, x+width-3, y+3, x, y+3);
+            quad(x, y, x+4, y, x+4, y+height-4, x, y+height);
+            quad(x, y, x+width, y, x+width-4, y+4, x, y+4);
             
             fill(100);
-            quad(x+3, y+height-3, x+width, y+height-3, x+width, y+height, x, y+height);
-            quad(x+width-3, y+3, x+width, y, x+width, y+height, x+width-3, y+height);
+            quad(x+4, y+height-4, x+width, y+height-4, x+width, y+height, x, y+height);
+            quad(x+width-4, y+4, x+width, y, x+width, y+height, x+width-4, y+height);
         }
 
         if(countBombs(r,c) == 1)    fill(0,0,255);
@@ -316,7 +329,7 @@ public class GameButton
         textSize(30);
 
         if(myType == "restart")
-            text("Restart", myX+widthh/2, myY+heightt/2);
+            text("Restart", myX+widthh/2, myY+heightt/2-5);
 
         if(inButton())
             highlighted();
@@ -345,7 +358,7 @@ public class GameButton
 
     public void mousePressed()
     {
-        if(inButton())
+        if(mousePressed && inButton())
             RestartGame();
     }
 }
