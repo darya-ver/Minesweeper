@@ -2,7 +2,7 @@ import de.bezier.guido.*;
 
 private static final int NUM_ROWS = 20;
 private static final int NUM_COLS = 20;
-private static final int NUM_BOMS = 10;
+private static final int NUM_BOMS = 30; 
 
 private ArrayList <Button> changeSizeButtons = new ArrayList <Button>();
 
@@ -107,6 +107,7 @@ public void displayLosingMessage()
         bombb.setClicked(true);
     }
     fill(110);
+    textSize(30);
     text("AWE you lost :(", height+(width-height)/2, 50);
 
     restart.show();
@@ -115,6 +116,7 @@ public void displayLosingMessage()
 public void displayWinningMessage()
 {
     fill(110);
+    textSize(30);
     text("OMG you won!", height+(width-height)/2, 50);
 
     restart.show();
