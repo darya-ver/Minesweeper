@@ -2,7 +2,7 @@ import de.bezier.guido.*;
 
 private static final int NUM_ROWS = 20;
 private static final int NUM_COLS = 20;
-private static final int NUM_BOMS = 10; 
+private static final int NUM_BOMS = 30; 
 
 private ArrayList <Button> changeSizeButtons = new ArrayList <Button>();
 
