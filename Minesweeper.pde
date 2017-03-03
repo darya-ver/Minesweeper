@@ -2,7 +2,7 @@ import de.bezier.guido.*;
 
 private static final int NUM_ROWS = 20;
 private static final int NUM_COLS = 20;
-private static final int NUM_BOMS = 30; 
+private static final int NUM_BOMS = 10; 
 
 private ArrayList <Button> changeSizeButtons = new ArrayList <Button>();
 
@@ -79,7 +79,7 @@ public void draw ()
         else if(!lastBombClicked.contains(butt)) butt.lastOneClicked = false;
     }
 
-    if(isWon())
+    if(isWon() || isWon1())
         displayWinningMessage();
 
     if(lost)
@@ -95,6 +95,16 @@ public boolean isWon()
         for(int c = 0; c < NUM_COLS; c++)
             if(!bombs.contains(buttons[r][c]) && !buttons[r][c].isClicked())
                 return false;
+
+    return true; 
+}
+
+public boolean isWon1()
+{
+    for(int r = 0; r < NUM_ROWS; r++)
+    for(int c = 0; c < NUM_COLS; c++)
+        if(bombs.contains(buttons[r][c]) && !buttons[r][c].isMarked())
+            return false;
 
     return true; 
 }
