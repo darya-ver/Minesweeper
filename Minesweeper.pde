@@ -4,8 +4,6 @@ private static final int NUM_ROWS = 20;
 private static final int NUM_COLS = 20;
 private static final int NUM_BOMS = 30; 
 
-private ArrayList <Button> changeSizeButtons = new ArrayList <Button>();
-
 private PImage bombImg;
 private PImage flagImg;
 
@@ -56,7 +54,6 @@ public void setBombs()
         if(!bombs.contains(buttons[roww][coll]))
         {
             bombs.add(buttons[roww][coll]);
-            //System.out.println("("+roww+","+coll+")");
         }
         else
             i--;
@@ -85,8 +82,6 @@ public void draw ()
     if(lost)
         displayLosingMessage();
 
-    //for(int i = 0; i < bombs.size(); i++)
-        //System.out.println("Button " + i + bombs.get(i).isMarked());
 }
 
 public boolean isWon()
@@ -300,12 +295,6 @@ public class MSButton
     }
 }
 
-/*void mousePressed()
-{
-    if(mouseX > height)
-        RestartGame();
-}
-*/
 public void RestartGame()
 {
     lost = false;
